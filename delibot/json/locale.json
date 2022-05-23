@@ -1,4 +1,16 @@
 {
+        "VALOR":{
+                "US": "Valor",
+                "DE": "Wagemut"
+        },
+        "MYSTIC":{
+                "US": "Mystic",
+                "DE": "Weisheit"
+        },
+        "INSTINCT":{
+                "US": "Instinct",
+                "DE": "Intuition"
+        },
 	"FEATURED_POKEMON":{
 		"US": "Featured Pokémon",
 		"SE": "Dagens Pokémon",
@@ -79,6 +91,10 @@
 		"CS": "Nemáš dostatečné pravomoce k používání tohoto příkazu.",
 		"ES": "No tienes permiso para ejecutar este comando."
 	},
+        "TIMEOUT":{
+                "US": "You took too long to respond, please try again.",
+                "DE": "Du hast zu lange gebraucht. Bitte versuche es erneut."
+        },
 	"EDIT_QUESTION":{
 		"US": "What would you like to edit?",
 		"SE": "Vad vill du redigera?",
@@ -99,6 +115,10 @@
 		"CS": "Napiš nový text",
 		"ES": "Escribe un nuevo"
 	},
+        "REACT_WITH_EMOJI":{
+                "US": "React with an Emoji below:",
+                "DE": "Bitte Emoji anklicken:"
+        },
 	"THANK_YOU":{
 		"US": "Thank you",
 		"SE": "Tack",

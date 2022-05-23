@@ -9,18 +9,25 @@ from discord.ext import commands
 
 
 class OCR(commands.Cog):
+#    """
+#    Commands for assigning Team-role and reading EX-raid images.
+#    """
     """
-    Commands for assigning Team-role and reading EX-raid images.
+    Befehle für Teamzuweisung und Einlesen von EX-Raid-Bildern.
     """
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="valor", aliases=['instinct', 'mystic', 'Instinct', 'Mystic', 'Valor'])
-    async def valor(self, ctx):
+    @commands.command(name="wagemut", aliases=['instinct', 'mystic', 'valor', 'Instinct', 'Mystic', 'Valor', 'gelb', 'blau', 'rot', 'Gelb', 'Blau', 'Rot', 'intuition', 'weisheit', 'Intuition', 'Weisheit', 'Wagemut'])
+    async def wagemut(self, ctx):
+#        """
+#        Assigns a team to yourself.
+#        Example: *.mystic*
+#        """
         """
-        Assigns a team to yourself.
-        Example: *!mystic*
+        Weist dir ein Team zu.
+        Beispiele: .gelb, .weisheit
         """
         # Deletes your command.
         await ctx.message.delete()
@@ -33,13 +40,19 @@ class OCR(commands.Cog):
             "Utils").get_translation(ctx.message.guild.id,
                                      "ERROR MISSING_ROLE MISSING_ROLE_DESC TEAM_ALREADY_ASSIGNED TEAM_ALREADY_ASSIGNED_DESC INSUFFICIENT_PERM MISSING_PERM TEAM_WELCOME TEAM_WELCOME_DESC")
 
-        TARGET_COLORS = {"Valor": discord.Colour.red(), "Instinct": discord.Colour.gold(),
-                         "Mystic": discord.Colour.blue()}
+        TARGET_COLORS = {"Wagemut": discord.Colour.red(), "Intuition": discord.Colour.gold(),
+                         "Weisheit": discord.Colour.blue()}
         TARGET_IMAGES = {
-            "Valor": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_red.png",
-            "Instinct": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_yellow.png",
-            "Mystic": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_blue.png"}
+            "Wagemut": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_red.png",
+            "Intuition": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_yellow.png",
+            "Weisheit": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_blue.png"}
 
+        if team in ['valor', 'Valor', 'rot', 'Rot', 'wagemut', 'Wagemut']:
+            team = 'Wagemut'
+        elif team in ['mystic', 'Mystic', 'blau', 'Blau', 'weisheit', 'Weisheit']:
+            team = 'Weisheit'
+        elif team in ['instinct', 'Instinct', 'gelb', 'Gelb', 'intuition', 'Intuition']:
+            team = 'Intuition'
         role = discord.utils.get(ctx.message.guild.roles, name=team)  # Uppercase
         if role is None:
             role = discord.utils.get(ctx.message.guild.roles, name=team.lower())  # Lowercase
@@ -51,7 +64,7 @@ class OCR(commands.Cog):
                 return
 
         for author_role in ctx.message.author.roles:
-            if author_role.name.lower() in ['valor', 'instinct', 'mystic']:
+            if author_role.name.lower() in ['wagemut', 'intuition', 'weisheit']:
                 embed = discord.Embed(title=f"{error} - {team_already_assigned}",
                                       description=f"{team_already_assigned_desc}",
                                       color=discord.Colour.red())
@@ -221,11 +234,11 @@ class OCR(commands.Cog):
         with Image.open(BytesIO(image_bytes)) as my_image:
             RGB = my_image.getpixel((1, my_image.size[1] * 0.5))
 
-        TARGET_COLORS = {"Valor": (255, 0, 0), "Instinct": (255, 255, 0), "Mystic": (0, 0, 255)}
+        TARGET_COLORS = {"Wagemut": (255, 0, 0), "Intuition": (255, 255, 0), "Weisheit": (0, 0, 255)}
         TARGET_IMAGES = {
-            "Valor": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_red.png",
-            "Instinct": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_yellow.png",
-            "Mystic": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_blue.png"}
+            "Wagemut": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_red.png",
+            "Intuition": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_yellow.png",
+            "Weisheit": "https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/static_assets/png/team_blue.png"}
 
         def color_difference(color1, color2):
             return sum([abs(component1 - component2) for component1, component2 in zip(color1, color2)])

@@ -43,7 +43,10 @@ class Research(commands.Cog):
             await asyncio.sleep(3600)
 
     @commands.command(pass_context=True, aliases=["rs", "quest", "Quest", "Research", "RS", "q", "Q"])
-    async def research(self, ctx, *, info: str = None):
+    async def research(self, ctx): #, *, info: str = None):
+        """
+        Erstellt eine Info zu einer Feldforschung. Die Details werden in privaten Nachrichten gefragt.
+        """
 
         try:
             await ctx.message.delete()
@@ -66,7 +69,8 @@ class Research(commands.Cog):
                                      "WHAT_QUEST WHAT_REWARD WHAT_POKESTOP TYPE_BELOW QUEST_CREATION QUEST QUEST_REWARD THANK_YOU RAID_BY")
 
         try:
-            if info is None:
+            if True:
+#            if info is None:
                 # No input given, ask the user in PM
                 embed = discord.Embed(title=what_quest, color=discord.Colour.red())
                 embed.set_footer(text=type_below)

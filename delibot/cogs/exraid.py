@@ -8,8 +8,11 @@ log = logging.getLogger()
 
 
 class Exraid(commands.Cog):
+#    """
+#    Commands for EX-Raids.
+#    """
     """
-    Commands for EX-Raids.
+    Befehle für EX-Raids.
     """
 
     def __init__(self, bot):
@@ -76,21 +79,25 @@ class Exraid(commands.Cog):
 
     @commands.command(pass_context=True, aliases=['Exraid', 'xr', 'Xr'])
     async def exraid(self, ctx, pokemon: str, time: str, day: str, *, location: str, delete=True):
+#        """
+#        Starts a EX-raid. Works just like ".raid" but it lasts for 14 days and takes "day" as an additional parameter)
+#        """
         """
-        Starts a EX-raid. Works just like "!raid" but it lasts for 14 days and takes "day" as an additional parameter)
+        Erstellt einen EX-Raid. Funktioniert wie ".raid", aber hat den zusätzlichen Parameter "day" und der Raid ist für 14 Tage aktiv.
         """
+
 
         if delete:
             await ctx.message.delete()
 
         # Retrieve translation from JSON.
-        raid_time, raid_location, raid_total, raid_by, raid_day = await self.bot.get_cog("Utils").get_translation(
-            ctx.message.guild.id, "RAID_TIME RAID_LOCATION RAID_TOTAL RAID_BY RAID_DAY")
+        raid_time, raid_location, raid_total, raid_by, raid_day, valor, mystic, instinct = await self.bot.get_cog("Utils").get_translation(
+            ctx.message.guild.id, "RAID_TIME RAID_LOCATION RAID_TOTAL RAID_BY RAID_DAY VALOR MYSTIC INSTINCT")
 
         # Create the user in the database if he doesn't exist.
         await self.bot.get_cog("Utils").create_user_if_not_exist(ctx.message.guild.id, ctx.message.author.id)
 
-        # Channel to post in if it exist.
+        # Channel to post in if it exists.
         (default_ex_channel, ) = await self.get_default_ex_channel(ctx.message.guild.id)
 
         # Retrieve gym location.
@@ -106,9 +113,9 @@ class Exraid(commands.Cog):
         images = await self.bot.get_cog("Utils").get_pokemon_image_url(pokemon_id)
         embed.set_thumbnail(url=images['url'])
         embed.set_author(name=f"⭐{pokemon.title()}⭐", icon_url=images['icon_url'])
-        embed.add_field(name="Valor (0)", value="\u200b", inline=False)
-        embed.add_field(name="Mystic (0)", value="\u200b", inline=False)
-        embed.add_field(name="Instinct (0)", value="\u200b", inline=False)
+        embed.add_field(name=f"{valor} (0)", value="\u200b", inline=False)
+        embed.add_field(name=f"{mystic} (0)", value="\u200b", inline=False)
+        embed.add_field(name=f"{instinct} (0)", value="\u200b", inline=False)
         embed.set_footer(text=f"{raid_total} 0 | {raid_by} {str(ctx.message.author)}")
         embed.timestamp = datetime.utcnow()
 

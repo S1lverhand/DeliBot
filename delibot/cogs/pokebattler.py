@@ -45,9 +45,9 @@ class Pokebattler(commands.Cog):
         **Limit:** 1-24
 
         Examples:
-        *!counter great umbreon*
-        *!counter great umbreon counters 10*
-        *!c g umbreon c 15*
+        *.counter great umbreon*
+        *.counter great umbreon counters 10*
+        *.c g umbreon c 15*
         """
 
         await ctx.message.delete()
@@ -149,7 +149,7 @@ class Pokebattler(commands.Cog):
     async def pokebattler(self, ctx, pokemon: str):
         """
         Shows detailed information with counters on a specific Raid-boss.
-        Example: *!pokebattler snorlax*
+        Example: *.pokebattler snorlax*
         """
         # Battle Options
         WEATHERS = {'1': 'NO_WEATHER', '2': 'CLEAR', '3': 'RAINY', '4': 'PARTLY_CLOUDY', '5': 'OVERCAST', '6': 'WINDY',
@@ -286,6 +286,7 @@ class Pokebattler(commands.Cog):
         else:
             pokemon_id = await self.bot.get_cog("Utils").get_pokemon_id(pokemon)
             pokemon_eng = await self.bot.get_cog("Utils").get_pokemon_name(pokemon_id)
+        pokemon_eng = pokemon_eng.replace(" ", "_")
 
         boss = pokemon.title()
 
@@ -295,7 +296,7 @@ class Pokebattler(commands.Cog):
             return
 
         try:
-            url = f"https://fight.pokebattler.com/raids/defenders/{pokemon_eng.upper()}/levels/{raid_tier}/attackers/levels/30/strategies/{ATTACK_STRAT}/DEFENSE_RANDOM_MC?sort=OVERALL&weatherCondition={WEATHER}&dodgeStrategy={DODGE_STRAT}&aggregation=AVERAGE&randomAssistants=-1&friendLevel={FRIEND_LEVEL}"
+            url = f"https://fight.pokebattler.com/raids/defenders/{pokemon_eng.upper()}/levels/{raid_tier}/attackers/levels/40/strategies/{ATTACK_STRAT}/DEFENSE_RANDOM_MC?sort=OVERALL&weatherCondition={WEATHER}&dodgeStrategy={DODGE_STRAT}&aggregation=AVERAGE&randomAssistants=-1&friendLevel={FRIEND_LEVEL}&includeLegendary=true&includeShadow=true&includeMegas=true"
         except KeyError:
             await user.send("Error - This Pokémon has not yet been added to the list OR It does not exist in raids.")
             return
@@ -434,12 +435,12 @@ class Pokebattler(commands.Cog):
             data = json.load(f)
 
         # For each tier
-        for i in range(0, 14):
+        for tier in data['tiers']:
 
-            current_tier = data['tiers'][i]['tier']
+            current_tier = tier['tier']
 
             # Each mon in this tier
-            for mons in data['tiers'][i]['raids']:
+            for mons in tier['raids']:
 
                 if mons['pokemon'] == pokemon.upper():
 

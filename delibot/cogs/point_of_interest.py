@@ -26,15 +26,15 @@ class PointOfInterest(commands.Cog):
     async def create(self, ctx):
         """
         Adds a Gym / Pokestop to the database so it will appear as a hyperlink on Raid-creations.
-        Example: !create gym "Some name" 60.450 -20.350
-        Example: !create pokestop "Some name" 60.450 -20.350
+        Example: .create gym "Some name" 60.450 -20.350
+        Example: .create pokestop "Some name" 60.450 -20.350
         """
         await ctx.message.delete()
 
         embed = discord.Embed(title=f"Available sub-commands for Create",
                               color=discord.Colour.orange())
-        embed.add_field(name='gym', value='Example: !create gym "city fountain" 12.345 98.765', inline=False)
-        embed.add_field(name='pokestop', value='Example: !create pokestop "water mountain" 12.345 98.765', inline=False)
+        embed.add_field(name='gym', value='Example: .create gym "city fountain" 12.345 98.765', inline=False)
+        embed.add_field(name='pokestop', value='Example: .create pokestop "water mountain" 12.345 98.765', inline=False)
         embed.set_footer(text="Auto-deleting in 20 seconds..")
 
         await ctx.message.channel.send(embed=embed, delete_after=20)
@@ -114,15 +114,15 @@ class PointOfInterest(commands.Cog):
     async def delete(self, ctx):
         """
         Deletes a Gym / Pokestop from the database.
-        Example: *!delete gym "Some name"*
-        Example: *!delete pokestop "Some name"*
+        Example: *.delete gym "Some name"*
+        Example: *.delete pokestop "Some name"*
         """
         await ctx.message.delete()
 
         embed = discord.Embed(title=f"Available sub-commands for Delete",
                               color=discord.Colour.orange())
-        embed.add_field(name='gym', value='Example: !delete gym "city fountain"', inline=False)
-        embed.add_field(name='pokestop', value='Example: !delete pokestop "water mountain"', inline=False)
+        embed.add_field(name='gym', value='Example: .delete gym "city fountain"', inline=False)
+        embed.add_field(name='pokestop', value='Example: .delete pokestop "water mountain"', inline=False)
         embed.set_footer(text="Auto-deleting in 15 seconds..")
 
         await ctx.message.channel.send(embed=embed, delete_after=15)

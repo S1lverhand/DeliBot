@@ -10,8 +10,11 @@ log = logging.getLogger()
 
 
 class Community(commands.Cog):
+#    """
+#    Commands for Community-day.
+#    """
     """
-    Commands for Community-day.
+    Befehle für Community-day.
     """
 
     def __init__(self, bot):
@@ -35,7 +38,7 @@ class Community(commands.Cog):
                             json = await response.json(content_type='text/plain')
                         else:
                             return
-                        
+
                 for event in json:
                     if event['type'] == "community-day":
                         await self.bot.get_cog("Utils").dump_json('json/community_day.json', event)
@@ -47,7 +50,13 @@ class Community(commands.Cog):
     @commands.command(pass_context=True,
                       aliases=["cd", "Cd", "Cday", "cday", "community", "Community", "Community_day"])
     async def community_day(self, ctx):
-        """Information message of the next Community-day."""
+#        """
+#        Information message of the next Community-day.
+#        """
+        """
+        Informationen für den nächsten Community-day.
+        """
+
         await ctx.message.delete()
 
         embed = await self.get_embed_community_day(self, ctx.message.guild.id)
@@ -64,17 +73,21 @@ class Community(commands.Cog):
         featured_pokemon_title, exclusive_move_title, bonus_title, date_title, official_page_title, community_day_title = await self.bot.get_cog(
             "Utils").get_translation(server_id, "FEATURED_POKEMON EXCLUSIVE_MOVE BONUS DATE OFFICIAL_PAGE COMMUNITY_DAY")
 
+        boni=""
+        for bonus in data["bonuses"]:
+            boni += ":star: " + bonus['text'] + "\n\u200b"
+
         embed = discord.Embed(title=data["name"],
                               colour=0x0000FF,
-                              description=f':calendar_spiral: **Starts:** {data["start"]}\n\n:calendar_spiral: **Ends:** {data["end"]}')
+                              description=f':calendar_spiral: **Start:** {data["start"]}\n:calendar_spiral: **Ende:** {data["end"]}\n\n' + boni)
 
         embed.set_thumbnail(
-            url=f'https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/pokemon_icons/pokemon_icon_{data["shinies"][0]["id"]}_00_shiny.png')
+            url=f'https://raw.githubusercontent.com/ZeChrales/PogoAssets/master/pokemon_icons/pokemon_icon_{data["shinies"][0]["id"]:03d}_00_shiny.png')
         embed.set_image(
             url="https://storage.googleapis.com/pokemongolive/communityday/PKMN_Community-Day-logo2.png")
 
-        for bonus in data["bonuses"]:
-            embed.add_field(name=f":star: {bonus_title}", value=bonus['text'] + "\n\u200b", inline=False)
+#        for bonus in data["bonuses"]:
+#            embed.add_field(name=f":star: {bonus_title}", value=bonus['text'] + "\u200b", inline=False)
 
         return embed
 

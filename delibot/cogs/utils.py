@@ -18,7 +18,12 @@ log = logging.getLogger()
 
 
 class Utils(commands.Cog):
-    """Commands for various things."""
+#    """
+#    Commands for various things.
+#    """
+    """
+    Befehle für Verschiedenes.
+    """
 
     def __init__(self, bot):
         self.bot = bot
@@ -116,13 +121,20 @@ class Utils(commands.Cog):
 
     @commands.group(invoke_without_command=True, aliases=['Stats', 'S', 's'])
     async def stats(self, ctx, user: discord.Member = None):
+#        """
+#        Displays detailed statistics.
+#
+#        Example: *.stats @user* (for a specific user)
+#        Example: *.stats server* (for this server)
+#        Example: *.stats leaderboard* (for this server)
+#        Example: *.stats overall* (for all servers)
+#        """
         """
-        Displays detailed statistics.
+        Zeigt Statistiken.
 
-        Example: *!stats @user* (for a specific user)
-        Example: *!stats server* (for this server)
-        Example: *!stats leaderboard* (for this server)
-        Example: *!stats overall* (for all servers)
+        Beispiel: .stats @user
+        Beispiel: .stats server
+        Beispiel: .stats leaderboard
         """
 
         # Deletes the command
@@ -255,62 +267,96 @@ class Utils(commands.Cog):
 
         await ctx.message.channel.send(embed=embed)
 
-    @commands.group(invoke_without_command=True, name='find', aliases=['Find', 'f', 'F'])
+    @commands.group(invoke_without_command=True, name='find', aliases=['Find', 'f', 'F', 'finde', 'Finde'])
     async def mysqlfinder(self, ctx, *, gym_name: str):
+#        """
+#        Retrieves the location of a created gym with a image and hyperlink.
+#        """
         """
-        Retrieves the location of a created gym with a image and hyperlink.
+        Findet eine Arena/einen Stop und schickt einen Link als private Nachricht.
         """
         await ctx.message.delete()
 
-        embed = discord.Embed(title=f"Gym Information for {ctx.message.guild.name}", color=discord.Colour.purple())
+        embed = discord.Embed(title=f"Arena Information für {ctx.message.guild.name}", color=discord.Colour.purple())
         embed.set_thumbnail(url="https://obihoernchen.net/pokemon/core/img/rocket.png")
-
-        # Retrieve gym location.
-        gym_loc = await self.get_gym(ctx.message.guild.id, gym_name.lower())
 
         query = "SELECT name, lat, lon FROM gyms WHERE server_id = %s AND name LIKE %s"
         params = (ctx.message.guild.id, "%" + gym_name.lower() + "%")
-        response = await self.bot.db.execute(query, params, single=True)
+        response = await self.bot.db.execute(query, params, single=False)
+        print(response)
 
-        if len(response) > 0:
-            name, lat, lon = response
+        if response is not None and len(response) > 0:
+            for single_response in response:
+                name, lat, lon = single_response
 
-            if name is None:
-                embed.add_field(name=f"Sorry, {gym_name} was not found.",
-                                value=f"Are you sure the gym exist? Try finding it with '!list gym'", inline=False)
-            else:
-                embed.add_field(name=f"{gym_name.title()}", value=f"{gym_loc}", inline=False)
+                if name is None:
+#                embed.add_field(name=f"Sorry, {gym_name} was not found.",
+#                                value=f"Are you sure the gym exist? Try finding it with '.list gym'", inline=False)
+                    embed.add_field(name=f"{gym_name} wurde nicht gefunden.",
+                                    value=f"Hast du dich vertippt? Suche die Arena mit '.list gym'", inline=False)
+                else:
+                    # Retrieve gym location.
+                    gym_loc = await self.get_gym(ctx.message.guild.id, name.lower())
+                    embed.add_field(name=f"{gym_name.title()}", value=f"{gym_loc}", inline=False)
+
+            if len(response) == 1:
+                _, lat, lon = response[0]
                 try:
-
                     url = await self.get_static_map_url(lat, lon)
                     embed.set_image(url=url)
                 except IndexError:
                     pass
-            try:
-                await ctx.message.author.send(embed=embed)
-            except discord.Forbidden:
-                embed = discord.Embed(title=f"Insufficient permissions.",
-                                      description=f"{ctx.message.author.mention} You have either blocked me, or messages from strangers.\nEnable: Settings > Privacy & Safety > Allow direct messages from server members.",
-                                      color=discord.Colour.dark_red())
-                embed.set_footer(text="Auto-deleting in 20 seconds..")
-                await ctx.message.channel.send(embed=embed, delete_after=20)
         else:
-            embed.add_field(name=f"Sorry, {gym_name} was not found.",
-                            value=f"Are you sure the gym exist? Try finding it with '!list gym'", inline=False)
+            query = "SELECT name, lat, lon FROM pokestops WHERE server_id = %s AND name LIKE %s"
+            params = (ctx.message.guild.id, "%" + gym_name.lower() + "%")
+            response = await self.bot.db.execute(query, params, single=False)
+            print(response)
 
+            if response is not None and len(response) > 0:
+                for single_response in response:
+                    name, lat, lon = single_response
+
+                    if name is notNone:
+                        # Retrieve Pokestop location.
+                        stop_loc = await self.get_gym(ctx.message.guild.id, name.lower())
+                        embed.add_field(name=f"{gym_name.title()}", value=f"{stop_loc}", inline=False)
+
+                if len(response) == 1:
+                    _, lat, lon = response[0]
+                    try:
+                        url = await self.get_static_map_url(lat, lon)
+                        embed.set_image(url=url)
+                    except IndexError:
+                        pass
+
+            else:
+#            embed.add_field(name=f"Sorry, {gym_name} was not found.",
+#                            value=f"Are you sure the gym exist? Try finding it with '.list gym'", inline=False)
+                embed.add_field(name=f"{gym_name} wurde nicht gefunden.",
+                                value=f"Hast du dich vertippt? Suche die Arena/den Stop mit '.list gym' oder '.list stop'", inline=False)
+
+        try:
             await ctx.message.author.send(embed=embed)
-            return
+        except discord.Forbidden:
+            embed = discord.Embed(title=f"Insufficient permissions.",
+                                  description=f"{ctx.message.author.mention} You have either blocked me, or messages from strangers.\nEnable: Settings > Privacy & Safety > Allow direct messages from server members.",
+                                  color=discord.Colour.dark_red())
+            embed.set_footer(text="Auto-deleting in 20 seconds..")
+            await ctx.message.channel.send(embed=embed, delete_after=20)
 
-    @commands.group(invoke_without_command=True, aliases=['List', 'l', 'L'])
+    @commands.group(invoke_without_command=True, aliases=['List', 'l', 'L', 'liste', 'Liste'])
     async def list(self, ctx):
+#        """
+#        Displays a list of all the created gyms.
+#        Usage: .list gym
+#        """
         """
-        Displays a list of all the created gyms.
-        Usage: !list gym
+        Zeigt eine Liste aller Arenen oder Stops.
         """
-        embed = discord.Embed(title=f"List of available subcommands:",
+        embed = discord.Embed(title=f"Liste von verfügbaren Unterbefehlen:",
                               color=discord.Colour.green())
-        embed.add_field(name="list gyms", value="To view all gym locations.", inline=False)
-        embed.add_field(name="list pokestops", value="To view all pokestop locations.", inline=False)
+        embed.add_field(name="liste arenen", value="für alle Arenen", inline=False)
+        embed.add_field(name="liste pokestops", value="für alle Stops", inline=False)
         # embed.add_field(name="list raids", value="To view all the active raids.", inline=False)
         # embed.add_field(name="list quests", value="To view today's quests.", inline=False)
         await ctx.message.channel.send(embed=embed, delete_after=20)
@@ -320,6 +366,7 @@ class Utils(commands.Cog):
 
         query = 'SELECT * FROM pokestops WHERE server_id = %s ORDER BY name;'
         params = (ctx.message.guild.id, )
+        log.info(params)
         pokestops = await self.bot.db.execute(query, params)
 
         total_embeds = math.ceil(len(pokestops) / 25)
@@ -334,6 +381,7 @@ class Utils(commands.Cog):
 
             max_25_counter = 1
             for pokestop in pokestops:
+                log.info(pokestop)
 
                 if max_25_counter == 25:
                     break
@@ -383,7 +431,7 @@ class Utils(commands.Cog):
                 await message.remove_reaction('⬅', waited_user)
                 await message.edit(embed=embed_dict[counter])
 
-    @list.command(aliases=['Gym', 'gyms', 'Gyms'])
+    @list.command(aliases=['Gym', 'gyms', 'Gyms', 'arena', 'Arena', 'arenen', 'Arenen'])
     async def gym(self, ctx):
 
         query = 'SELECT * FROM gyms WHERE server_id = %s ORDER BY name;'
@@ -580,6 +628,14 @@ class Utils(commands.Cog):
             await ctx.send(embed=embed, delete_after=15)
             return
 
+        if mon_one_id is None or mon_two_id is None or int(mon_one_id) > 151 or int(mon_two_id) > 151:
+            embed = discord.Embed(title="Fehler",
+                                  description="Nur für Generation 1 verfügbar und der Pokémonname muss richtig geschrieben sein.",
+                                  color=discord.Color.red())
+            embed.set_footer(text="Auto-deleting in 15 seconds..")
+            await ctx.send(embed=embed, delete_after=15)
+            return
+
         url = f'https://images.alexonsager.net/pokemon/fused/{mon_two_id}/{mon_two_id}.{mon_one_id}.png'
 
         embed = discord.Embed(title=f'{mon_one.title()} + {mon_two.title()} = ',
@@ -590,7 +646,10 @@ class Utils(commands.Cog):
 
     @commands.command(name='help')
     async def _help(self, ctx, *, command: str = None):
-        """Shows help about a command or the bot."""
+#        """Shows help about a command or the bot."""
+        """
+        Zeigt eine Hilfe zu den Befehlen an.
+        """
 
         try:
             if command is None:
@@ -614,6 +673,21 @@ class Utils(commands.Cog):
     async def days_hours_minutes(td):
         return td.days, td.seconds // 3600, (td.seconds // 60) % 60
 
+    @commands.command(name='clear', aliases=['cc', 'purge'])
+    @commands.has_permissions(manage_messages=True)
+    async def clear(self, ctx, number: int = 1):
+        if number > 100:
+            await ctx.message.channel.send("You can only delete 100 messages a time!", delete_after=20)
+            return
+
+        def not_pinned(msg):
+            return not msg.pinned
+
+        try:
+            await ctx.message.delete()
+            purged = await ctx.channel.purge(limit=number, check=not_pinned)
+        except discord.Forbidden:
+            await ctx.message.channel.send("Insufficient permissions!", delete_after=20)
 
 def setup(bot):
     bot.add_cog(Utils(bot))

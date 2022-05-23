@@ -1,9 +1,11 @@
 import asyncio
 import datetime
+import logging
 
 import discord
 from discord.ext import commands
 
+log = logging.getLogger()
 
 class RawReaction(commands.Cog):
 
@@ -84,8 +86,8 @@ class RawReaction(commands.Cog):
                 return
 
         # Retrieve translation from JSON.
-        edit_question, edit_type, thank_you, raid_time, raid_location, raid_day = await self.bot.get_cog(
-            "Utils").get_translation(guild_id, "EDIT_QUESTION EDIT_TYPE THANK_YOU RAID_TIME RAID_LOCATION RAID_DAY")
+        edit_question, edit_type, react_with_emoji, thank_you, raid_time, raid_location, raid_day, timeout = await self.bot.get_cog(
+            "Utils").get_translation(guild_id, "EDIT_QUESTION EDIT_TYPE REACT_WITH_EMOJI THANK_YOU RAID_TIME RAID_LOCATION RAID_DAY TIMEOUT")
 
         keys = {'1⃣': 'pokemon', '2⃣': 'time', '3⃣': 'location', '4⃣': 'day'}
 
@@ -93,12 +95,13 @@ class RawReaction(commands.Cog):
         embed.add_field(name="1. Pokémon", value="\u200b", inline=False)
         embed.add_field(name=f"2. {raid_time}", value="\u200b", inline=False)
         embed.add_field(name=f"3. {raid_location}", value="\u200b", inline=False)
-        embed.add_field(name=f"4. {raid_day}", value="\u200b", inline=False)
+        if exraid is True:
+            embed.add_field(name=f"4. {raid_day}", value="\u200b", inline=False)
         embed.set_thumbnail(url="https://vignette.wikia.nocookie.net/pokemon/images/3/3b/Delibird_XY.gif")
-        embed.set_footer(text="React with an Emoji below:")
+        embed.set_footer(text=f"{react_with_emoji}")
         msg = await member.send(embed=embed)
 
-        add_reactions = ['1⃣', '2⃣', '3⃣', '4⃣']
+        add_reactions = ['1⃣', '2⃣', '3⃣', '4⃣'] if exraid is True else  ['1⃣', '2⃣', '3⃣']
         for add_reaction in add_reactions:
             await msg.add_reaction(add_reaction)
 
@@ -106,16 +109,16 @@ class RawReaction(commands.Cog):
             return user.id == member.id
 
         try:
-            wait_for_reaction, wait_for_user = await self.bot.wait_for('reaction_add', timeout=5.0, check=check_reaction)
+            wait_for_reaction, wait_for_user = await self.bot.wait_for('reaction_add', timeout=10.0, check=check_reaction)
         except asyncio.TimeoutError:
             embed = discord.Embed(title=f"Timeout",
-                                  description=f"You took too long to respond, please try again.",
+                                  description=f"{timeout}",
                                   color=discord.Colour.dark_red())
             await member.send(embed=embed)
             return
 
-        embed = discord.Embed(title=f"{edit_type} {keys[wait_for_reaction.emoji].title()}",
-                              color=discord.Colour.orange())
+        item = await self.bot.get_cog("Utils").get_translation(guild_id, "RAID_" + keys[wait_for_reaction.emoji].title().upper())
+        embed = discord.Embed(title=f"{edit_type} {item[0]}", color=discord.Colour.orange())
         await member.send(embed=embed)
 
         def check_msg(message):
@@ -125,13 +128,13 @@ class RawReaction(commands.Cog):
             wait_for_message = await self.bot.wait_for('message', timeout=60.0, check=check_msg)
         except asyncio.TimeoutError:
             embed = discord.Embed(title=f"Timeout",
-                                  description=f"You took too long to respond, please try again.",
+                                  description=f"{timeout}",
                                   color=discord.Colour.dark_red())
             await member.send(embed=embed)
             return
 
         embed = discord.Embed(title=f"{thank_you}!",
-                              description=f"{keys[wait_for_reaction.emoji].title()} will be changed to: {wait_for_message.content}",
+                              description=f"{item[0]} will be changed to: {wait_for_message.content}",
                               color=discord.Colour.green())
         embed.set_thumbnail(url="https://www.inzonedesign.com/wp-content/uploads/2015/05/checkmark.gif")
         await member.send(embed=embed)
@@ -238,8 +241,8 @@ class RawReaction(commands.Cog):
             instinct_names = "\u200b"
 
         # Retrieve translation from JSON.
-        raid_time, raid_location, raid_total, raid_by, raid_day = await self.bot.get_cog("Utils").get_translation(
-            guild_id, "RAID_TIME RAID_LOCATION RAID_TOTAL RAID_BY RAID_DAY")
+        raid_time, raid_location, raid_total, raid_by, raid_day, valor, mystic, instinct = await self.bot.get_cog("Utils").get_translation(
+            guild_id, "RAID_TIME RAID_LOCATION RAID_TOTAL RAID_BY RAID_DAY VALOR MYSTIC INSTINCT")
 
         # Retrieve gym location.
         gym_name = await self.bot.get_cog("Utils").get_gym(guild_id, location.lower())
@@ -265,9 +268,9 @@ class RawReaction(commands.Cog):
 
         embed.set_author(name=boss.title(), icon_url=images['icon_url'])
         embed.set_thumbnail(url=images['url'])
-        embed.add_field(name=f"Valor ({total_valor})", value=f"{valor_names}", inline=False)
-        embed.add_field(name=f"Mystic ({total_mystic})", value=f"{mystic_names}", inline=False)
-        embed.add_field(name=f"Instinct ({total_instinct})", value=f"{instinct_names}", inline=False)
+        embed.add_field(name=f"{valor} ({total_valor})", value=f"{valor_names}", inline=False)
+        embed.add_field(name=f"{mystic} ({total_mystic})", value=f"{mystic_names}", inline=False)
+        embed.add_field(name=f"{instinct} ({total_instinct})", value=f"{instinct_names}", inline=False)
         embed.set_footer(text=f"{raid_total}: {total} | {raid_by}: {guild.get_member(int(user_id))}")
 
         try:

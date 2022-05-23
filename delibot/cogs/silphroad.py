@@ -16,7 +16,7 @@ class Silphroad(commands.Cog):
     async def silphcard(self, ctx, name: str):
         """
         Shows information of a players silphcard.
-        Example: *!silphcard trnrtipsnick*
+        Example: *.silphcard trnrtipsnick*
         """
         await ctx.message.delete()
 
